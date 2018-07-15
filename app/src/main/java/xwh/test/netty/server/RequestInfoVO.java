@@ -1,5 +1,8 @@
 package xwh.test.netty.server;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by xwh on 18-7-14.
  */
@@ -31,5 +34,17 @@ public class RequestInfoVO {
 
     public void setSequence(int sequence) {
         this.sequence = sequence;
+    }
+
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        try {
+            json.put("type", type);
+            json.put("sequence", sequence);
+            json.put("body", body);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return json;
     }
 }

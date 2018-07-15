@@ -17,6 +17,8 @@ import xwh.test.netty.server.RequestInfoVO;
 
 /**
  * Created by xwh on 18-7-14.
+ *
+ * https://blog.csdn.net/weihao_/article/details/72780444
  */
 
 public class NettyClientBootstrap {
@@ -76,10 +78,9 @@ public class NettyClientBootstrap {
         while (true) {
             TimeUnit.SECONDS.sleep(2);
             RequestInfoVO req = new RequestInfoVO();
-            req.setSequence(123456);
-            req.setType((byte) 1);
-            req.setSequence(0);
-            req.setBody(String.valueOf((new Date()).getTime()));
+            req.setType(1);
+            req.setSequence(i);
+            req.setBody(new Date().toString());
             bootstrap.getSocketChannel().writeAndFlush(req);
             i++;
         }
