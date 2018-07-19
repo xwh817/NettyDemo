@@ -1,9 +1,7 @@
 package xwh.test.netty.client;
 
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -11,9 +9,13 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import xwh.test.netty.server.Const;
+import xwh.test.netty.server.Message;
 import xwh.test.netty.server.MessageDecoder;
 import xwh.test.netty.server.MessageEncoder;
-import xwh.test.netty.server.RequestInfoVO;
+import xwh.test.netty.utils.ByteUtil;
+import xwh.test.netty.utils.Logger;
 
 /**
  * Created by xwh on 18-7-14.
@@ -22,66 +24,73 @@ import xwh.test.netty.server.RequestInfoVO;
  */
 
 public class NettyClientBootstrap {
-    private int port;
+	private static final String TAG = "NettyServerBootstrap";
+
+	private int port;
     private String host;
-    private SocketChannel socketChannel;
-    public NettyClientBootstrap(int port, String host) throws Exception {
+    private SocketChannel mSocketChannel;
+    private Bootstrap mBootstrap;
+    public NettyClientBootstrap(int port, String host) {
         this.host = host;
         this.port = port;
-        start();
+	    init();
     }
-    private void start() throws Exception {
+    private void init() {
         EventLoopGroup eventLoopGroup = new NioEventLoopGroup();
-        Bootstrap bootstrap = new Bootstrap();
-        bootstrap.channel(NioSocketChannel.class);
-        bootstrap.option(ChannelOption.SO_KEEPALIVE, true);
-        bootstrap.option(ChannelOption.TCP_NODELAY, true);
-        bootstrap.group(eventLoopGroup);
-        bootstrap.remoteAddress(this.host, this.port);
-        bootstrap.handler(new ChannelInitializer<SocketChannel>() {
+	    mBootstrap = new Bootstrap();
+        mBootstrap.channel(NioSocketChannel.class);
+        mBootstrap.option(ChannelOption.SO_KEEPALIVE, true);
+        mBootstrap.option(ChannelOption.TCP_NODELAY, true);
+        mBootstrap.group(eventLoopGroup);
+        mBootstrap.remoteAddress(this.host, this.port);
+        mBootstrap.handler(new ChannelInitializer<SocketChannel>() {
             @Override
-            protected void initChannel(SocketChannel socketChannel) throws Exception {
-                socketChannel.pipeline().addLast(new MessageDecoder(), new MessageEncoder(), new NettyClientHandler());
+            protected void initChannel(SocketChannel socketChannel) {
+	            mSocketChannel = socketChannel;
+
+	            mSocketChannel.pipeline().addLast(new MessageDecoder(),
+			            new MessageEncoder(),
+			            new NettyClientHandler(),
+			            new DelimiterBasedFrameDecoder(1024, false, Unpooled.copiedBuffer(ByteUtil.toBytes(Const.HEADER)))
+	            );
+	            //Logger.d(TAG, "initChannel:" + socketChannel.localAddress().getHostString() + ", " + socketChannel.remoteAddress().getHostString());
             }
         });
-        ChannelFuture future = bootstrap.connect(this.host, this.port).sync();
-        if (future.isSuccess()) {
-            socketChannel = (SocketChannel) future.channel();
-            System.out.println("connect server  success|");
-        }
-    }
-    public int getPort() {
-        return this.port;
-    }
-    public void setPort(int port) {
-        this.port = port;
+
     }
 
-    public SocketChannel getSocketChannel() {
-        return socketChannel;
-    }
-    public void setSocketChannel(SocketChannel socketChannel) {
-        this.socketChannel = socketChannel;
-    }
-    public String getHost() {
-        return host;
-    }
-    public void setHost(String host) {
-        this.host = host;
+    public void connect() {
+	    ChannelFuture future = null;
+	    try {
+		    future = mBootstrap.connect(this.host, this.port).sync();
+	    } catch (InterruptedException e) {
+		    e.printStackTrace();
+	    }
+	    if (future.isSuccess()) {
+		    Logger.d(TAG,"connect server success");
+	    }
     }
 
+    public void disconnect() {
+    	mSocketChannel.close();
+    }
+
+    public void sendMessage(Message message) {
+    	mSocketChannel.writeAndFlush(message);
+    }
 
     public static void main(String[] args) throws Exception {
-        NettyClientBootstrap bootstrap = new NettyClientBootstrap(9999, "127.0.0.1");
-        int i = 1;
+        NettyClientBootstrap bootstrap = new NettyClientBootstrap(Const.SERVER_PORT, "127.0.0.1");
+        bootstrap.connect();
 
-        while (true) {
-            TimeUnit.SECONDS.sleep(2);
-            RequestInfoVO req = new RequestInfoVO();
+
+        for (int i = 1; i<= 100; i++) {
+            //TimeUnit.SECONDS.sleep(2);
+            Message req = new Message();
             req.setType(1);
             req.setSequence(i);
-            req.setBody(new Date().toString());
-            bootstrap.getSocketChannel().writeAndFlush(req);
+            req.setBody("message from client " + i);
+            bootstrap.sendMessage(req);
             i++;
         }
     }

@@ -28,7 +28,10 @@ public class MessageDecoder extends ByteToMessageDecoder {
 
         if (Const.HEADER != header) {
             Logger.e("MessageDecoder", "Error Header!");
-            ctx.close();
+            //ctx.close();
+
+            //如果数据长度小于设定的数据，则处于缓存状态
+            in.resetReaderIndex();
             return;
         }
 
@@ -51,7 +54,7 @@ public class MessageDecoder extends ByteToMessageDecoder {
         byte[] body = new byte[length];
         in.readBytes(body);
 
-        RequestInfoVO req = new RequestInfoVO();
+        Message req = new Message();
         req.setBody(new String(body, "utf-8"));
         req.setType(type);
         req.setSequence(squence);
@@ -59,7 +62,7 @@ public class MessageDecoder extends ByteToMessageDecoder {
         out.add(req);
 
 
-        Logger.e("MessageDecoder:", req.toJson().toString());
+        //Logger.e("MessageDecoder:", req.toJson().toString());
 
     }
 }

@@ -7,7 +7,7 @@ import org.json.JSONObject;
  * Created by xwh on 18-7-14.
  */
 
-public class RequestInfoVO {
+public class Message {
     private int type;
     private String body;
     private int sequence;

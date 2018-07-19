@@ -1,6 +1,7 @@
 package xwh.test.netty.server;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -9,6 +10,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.DelimiterBasedFrameDecoder;
+import xwh.test.netty.utils.ByteUtil;
 import xwh.test.netty.utils.Logger;
 
 /**
@@ -17,61 +20,69 @@ import xwh.test.netty.utils.Logger;
 
 public class NettyServerBootstrap {
     private static final String TAG = "NettyServerBootstrap";
-    private Integer port;
-    private SocketChannel socketChannel;
-    public NettyServerBootstrap(Integer port) throws Exception {
-        this.port = port;
-        bind(port);
+
+    private ServerBootstrap mServerBootstrap;
+
+    public NettyServerBootstrap() {
+        init();
     }
-    public Integer getPort() {
-        return port;
-    }
-    public void setPort(Integer port) {
-        this.port = port;
-    }
-    public SocketChannel getSocketChannel() {
-        return socketChannel;
-    }
-    public void setSocketChannel(SocketChannel socketChannel) {
-        this.socketChannel = socketChannel;
-    }
-    private void bind(int serverPort) throws Exception {
+
+    private void init() {
         // 连接处理group
         EventLoopGroup boss = new NioEventLoopGroup();
         // 事件处理group
         EventLoopGroup worker = new NioEventLoopGroup();
-        ServerBootstrap bootstrap = new ServerBootstrap();
+        mServerBootstrap = new ServerBootstrap();
         // 绑定处理group
-        bootstrap.group(boss, worker);
-        bootstrap.channel(NioServerSocketChannel.class);
+        mServerBootstrap.group(boss, worker);
+        mServerBootstrap.channel(NioServerSocketChannel.class);
         // 保持连接数
-        bootstrap.option(ChannelOption.SO_BACKLOG, 1024 * 1024);
+        mServerBootstrap.option(ChannelOption.SO_BACKLOG, 1024);
         // 有数据立即发送
-        bootstrap.option(ChannelOption.TCP_NODELAY, true);
+        mServerBootstrap.option(ChannelOption.TCP_NODELAY, true);
         // 保持连接
-        bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
+        mServerBootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
         // 处理新连接
-        bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
+        mServerBootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
             @Override
-            protected void initChannel(SocketChannel sc) throws Exception {
+            protected void initChannel(SocketChannel sc) {
+
+               // Logger.d(TAG, "initChannel:" + sc.localAddress().getHostString() + ", " + sc.remoteAddress().getHostString());
+
+                /**
+                 * 粘包问题 https://blog.csdn.net/a123638/article/details/54377934
+                 */
                 // 增加任务处理
                 ChannelPipeline p = sc.pipeline();
-                p.addLast(new MessageDecoder(), new MessageEncoder(), new NettyServerHandler());
+                p.addLast(
+                        new MessageDecoder(),
+                        new MessageEncoder(),
+                        new NettyServerHandler(),
+                        new DelimiterBasedFrameDecoder(1024, false, Unpooled.copiedBuffer(ByteUtil.toBytes(Const.HEADER)))
+                );
             }
         });
 
-        ChannelFuture f = bootstrap.bind(serverPort).sync();
+    }
+
+    public void bind() {
+        ChannelFuture f = null;
+        try {
+            f = mServerBootstrap.bind(Const.SERVER_PORT).sync();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         if (f.isSuccess()) {
-            Logger.d(TAG, "long connection started success");
+            Logger.d(TAG, "Server started success");
         } else {
             Logger.e(TAG, "long connection started fail");
         }
     }
 
-
     public static void main(String[] args) {
         try {
-            new NettyServerBootstrap(9999);
+            new NettyServerBootstrap().bind();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -1,26 +1,22 @@
 package xwh.test.netty.server;
 
-import android.text.TextUtils;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
-import xwh.test.netty.utils.Logger;
 
 /**
  * Created by xwh on 18-7-14.
  */
 
-public class MessageEncoder extends MessageToByteEncoder<RequestInfoVO> {
+public class MessageEncoder extends MessageToByteEncoder<Message> {
 
-    private static final String DEFAULT_ENCODE = "utf-8";
 
     public MessageEncoder() {
     }
 
     @Override
-    protected void encode(ChannelHandlerContext ctx, RequestInfoVO msg, ByteBuf out) throws Exception {
+    protected void encode(ChannelHandlerContext ctx, Message msg, ByteBuf out) throws Exception {
 
         if (msg == null) {
             return;
@@ -37,9 +33,8 @@ public class MessageEncoder extends MessageToByteEncoder<RequestInfoVO> {
         writer.writeInt(msg.getSequence());
 
         byte[] body = null;
-
-        if (!TextUtils.isEmpty(msg.getBody())) {
-            body = msg.getBody().getBytes(DEFAULT_ENCODE);
+        if (msg.getBody() != null && msg.getBody().length() > 0) {
+            body = msg.getBody().getBytes(Const.DEFAULT_ENCODE);
         }
 
         if (null == body || 0 == body.length) {
@@ -49,7 +44,7 @@ public class MessageEncoder extends MessageToByteEncoder<RequestInfoVO> {
             writer.write(body);
         }
 
-        Logger.e("MessageDecoder", msg.toJson().toString());
+       // Logger.e("MessageDecoder", msg.toJson().toString());
     }
 
 }
