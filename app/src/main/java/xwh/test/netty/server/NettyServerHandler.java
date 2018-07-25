@@ -13,7 +13,7 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Message> {
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Message msg) throws Exception {
 
-        Logger.d(TAG, msg.getBody());
+        //Logger.d(TAG, msg.getBody());
 
         Message req = new Message();
         req.setType(2);

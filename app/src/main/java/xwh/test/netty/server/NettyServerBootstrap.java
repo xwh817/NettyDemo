@@ -1,7 +1,6 @@
 package xwh.test.netty.server;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -10,8 +9,6 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.DelimiterBasedFrameDecoder;
-import xwh.test.netty.utils.ByteUtil;
 import xwh.test.netty.utils.Logger;
 
 /**
@@ -57,8 +54,7 @@ public class NettyServerBootstrap {
                 p.addLast(
                         new MessageDecoder(),
                         new MessageEncoder(),
-                        new NettyServerHandler(),
-                        new DelimiterBasedFrameDecoder(1024, false, Unpooled.copiedBuffer(ByteUtil.toBytes(Const.HEADER)))
+                        new NettyServerHandler()
                 );
             }
         });

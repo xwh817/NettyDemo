@@ -17,21 +17,21 @@ public class MessageDecoder extends ByteToMessageDecoder {
     }
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        if (in.readableBytes() < 14) {
-            Logger.e("MessageDecoder", "Error Length!");
+        //Logger.d("MessageDecoder", "readableBytes:" + in.readableBytes() + " / capacity:" + in.capacity());
+
+        int readableBytes = in.readableBytes();
+        // 这儿不知道每次发送过来的数据有多大，所以要判断大小。 最小长度：4 + 1 + 4 + 4 + 4
+        if (readableBytes < 17) {
             return;
         }
-        // 标记开始读取位置
+        // 标记开始读取位置，有可能缓存消息不全，要等下次继续读
         in.markReaderIndex();
 
         int header = in.readInt();
 
-        if (Const.HEADER != header) {
+        if (Const.HEADER != header) {   // 消息头错误，可能读取的下标错乱了
             Logger.e("MessageDecoder", "Error Header!");
-            //ctx.close();
-
-            //如果数据长度小于设定的数据，则处于缓存状态
-            in.resetReaderIndex();
+            ctx.close();
             return;
         }
 
@@ -40,14 +40,10 @@ public class MessageDecoder extends ByteToMessageDecoder {
         int squence = in.readInt();
         int length = in.readInt();
 
-        if (length < 0) {
-            ctx.close();
-            return;
-        }
-
-        if (in.readableBytes() < length) {
-            // 重置到开始读取位置
+        if (in.readableBytes() < length) {  // 消息体可读取长度不够了，等下次
+            // 这个配合markReaderIndex使用的。把readIndex重置到mark的地方，下次有数据来的时候继续从上个位置读
             in.resetReaderIndex();
+            Logger.e("MessageDecoder", "goto next decode");
             return;
         }
 
@@ -61,8 +57,7 @@ public class MessageDecoder extends ByteToMessageDecoder {
 
         out.add(req);
 
-
-        //Logger.e("MessageDecoder:", req.toJson().toString());
+        Logger.d("MessageDecoder", req.getSequence() +","+ req.getBody().length() +" ( "+ readableBytes + " / " + in.capacity() + "  <-- " + in.readerIndex());
 
     }
 }

@@ -44,7 +44,8 @@ public class MessageEncoder extends MessageToByteEncoder<Message> {
             writer.write(body);
         }
 
-       // Logger.e("MessageDecoder", msg.toJson().toString());
+        //Logger.d("MessageEncoder:", msg.getBody() +" ( " + out.capacity() + "  <-- " + out.writerIndex());
+
     }
 
 }
