@@ -1,8 +1,8 @@
-package xwh.test.netty.client;
+package xwh.netty.client;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import xwh.test.netty.server.Message;
+import xwh.netty.message.Message;
 
 /**
  * Created by xwh on 18-7-14.

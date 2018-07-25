@@ -1,4 +1,4 @@
-package xwh.test.netty.server;
+package xwh.netty.message;
 
 import org.json.JSONException;
 import org.json.JSONObject;

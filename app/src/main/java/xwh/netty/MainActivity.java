@@ -1,4 +1,4 @@
-package xwh.test.netty;
+package xwh.netty;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
-import xwh.test.netty.server.NettyServerBootstrap;
+import xwh.netty.server.NettyServerBootstrap;
 
 public class MainActivity extends AppCompatActivity {
 

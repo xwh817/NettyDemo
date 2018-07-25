@@ -1,8 +1,9 @@
-package xwh.test.netty.server;
+package xwh.netty.server;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import xwh.test.netty.utils.Logger;
+import xwh.netty.message.Message;
+import xwh.netty.utils.Logger;
 
 /**
  * Created by xwh on 18-7-14.
@@ -11,10 +12,11 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Message> {
     private static final String TAG= "NettyServerHandler";
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Message msg) throws Exception {
+    protected void channelRead0(ChannelHandlerContext ctx, Message msg) {
 
         //Logger.d(TAG, msg.getBody());
 
+        // 收到消息后回复
         Message req = new Message();
         req.setType(2);
         req.setSequence(msg.getSequence());

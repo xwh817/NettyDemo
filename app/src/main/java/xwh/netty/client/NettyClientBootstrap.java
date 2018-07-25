@@ -1,4 +1,4 @@
-package xwh.test.netty.client;
+package xwh.netty.client;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelFuture;
@@ -8,11 +8,11 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import xwh.test.netty.server.Const;
-import xwh.test.netty.server.Message;
-import xwh.test.netty.server.MessageDecoder;
-import xwh.test.netty.server.MessageEncoder;
-import xwh.test.netty.utils.Logger;
+import xwh.netty.message.Message;
+import xwh.netty.message.MessageDecoder;
+import xwh.netty.message.MessageEncoder;
+import xwh.netty.server.Const;
+import xwh.netty.utils.Logger;
 
 /**
  * Created by xwh on 18-7-14.
@@ -85,7 +85,7 @@ public class NettyClientBootstrap {
 	    	stringBuilder.append("message from client ");
 	    }
 
-        for (int i = 1; i<= 100; i++) {
+        for (int i = 1; i<= 10; i++) {
             //TimeUnit.SECONDS.sleep(2);
             Message req = new Message();
             req.setType(1);
@@ -93,6 +93,7 @@ public class NettyClientBootstrap {
 
             req.setBody(stringBuilder.toString());
             bootstrap.sendMessage(req);
+            //bootstrap.sendString("message from client " + i);
         }
     }
 }

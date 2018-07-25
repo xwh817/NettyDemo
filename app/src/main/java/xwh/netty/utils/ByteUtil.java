@@ -1,4 +1,4 @@
-package xwh.test.netty.utils;
+package xwh.netty.utils;
 
 /**
  * Created by xwh on 2018/7/19.

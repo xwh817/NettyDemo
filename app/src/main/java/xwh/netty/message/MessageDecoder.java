@@ -1,11 +1,12 @@
-package xwh.test.netty.server;
+package xwh.netty.message;
 
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import xwh.test.netty.utils.Logger;
+import xwh.netty.server.Const;
+import xwh.netty.utils.Logger;
 
 /**
  * Created by xwh on 18-7-14.
@@ -41,7 +42,7 @@ public class MessageDecoder extends ByteToMessageDecoder {
         int length = in.readInt();
 
         if (in.readableBytes() < length) {  // 消息体可读取长度不够了，等下次
-            // 这个配合markReaderIndex使用的。把readIndex重置到mark的地方，下次有数据来的时候继续从上个位置读
+            // 这个配合markReaderIndex使用的。把readIndex重置到mark的地方，下次有数据来的时候继续从上次开始位置读
             in.resetReaderIndex();
             Logger.e("MessageDecoder", "goto next decode");
             return;

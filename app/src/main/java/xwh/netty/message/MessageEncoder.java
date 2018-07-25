@@ -1,9 +1,10 @@
-package xwh.test.netty.server;
+package xwh.netty.message;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
+import xwh.netty.server.Const;
 
 /**
  * Created by xwh on 18-7-14.

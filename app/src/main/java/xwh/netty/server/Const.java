@@ -1,4 +1,4 @@
-package xwh.test.netty.server;
+package xwh.netty.server;
 
 /**
  * Created by xwh on 18-7-15.

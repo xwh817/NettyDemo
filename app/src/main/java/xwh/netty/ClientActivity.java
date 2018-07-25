@@ -1,4 +1,4 @@
-package xwh.test.netty;
+package xwh.netty;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -7,9 +7,9 @@ import android.widget.EditText;
 
 import java.util.Date;
 
-import xwh.test.netty.client.NettyClientBootstrap;
-import xwh.test.netty.server.Const;
-import xwh.test.netty.server.Message;
+import xwh.netty.client.NettyClientBootstrap;
+import xwh.netty.server.Const;
+import xwh.netty.message.Message;
 
 public class ClientActivity extends AppCompatActivity {
 
