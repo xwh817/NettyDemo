@@ -9,13 +9,13 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:onClick="startServer"
-		android:text="Server"/>
+		android:text="start server"/>
 
 	<Button
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:onClick="gotoClient"
-		android:text="Client"/>
+		android:text="start client"/>
 
 	<TextView
 		android:id="@+id/text_info"

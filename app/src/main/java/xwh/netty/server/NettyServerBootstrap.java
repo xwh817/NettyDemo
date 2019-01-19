@@ -1,5 +1,7 @@
 package xwh.netty.server;
 
+import java.util.concurrent.TimeUnit;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -9,6 +11,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 import xwh.netty.message.MessageDecoder;
 import xwh.netty.message.MessageEncoder;
 import xwh.netty.utils.Logger;
@@ -21,39 +24,34 @@ public class NettyServerBootstrap {
     private static final String TAG = "NettyServerBootstrap";
 
     private ServerBootstrap mServerBootstrap;
+    private EventLoopGroup mBossGroup;  // 连接处理group
+    private EventLoopGroup mWorkerGroup;    // 事件处理group
 
     public NettyServerBootstrap() {
         init();
     }
 
     private void init() {
-        // 连接处理group
-        EventLoopGroup boss = new NioEventLoopGroup();
-        // 事件处理group
-        EventLoopGroup worker = new NioEventLoopGroup();
+
+        mBossGroup = new NioEventLoopGroup();
+        mWorkerGroup = new NioEventLoopGroup();
+
         mServerBootstrap = new ServerBootstrap();
         // 绑定处理group
-        mServerBootstrap.group(boss, worker);
+        mServerBootstrap.group(mBossGroup, mWorkerGroup);
+
+	    // 设置Socket工厂
         mServerBootstrap.channel(NioServerSocketChannel.class);
-        // 保持连接数
-        mServerBootstrap.option(ChannelOption.SO_BACKLOG, 1024);
-        // 有数据立即发送
-        mServerBootstrap.option(ChannelOption.TCP_NODELAY, true);
-        // 保持连接
-        mServerBootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);
-        // 处理新连接
+        
+        // 设置管道工厂
         mServerBootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
             @Override
-            protected void initChannel(SocketChannel sc) {
+            protected void initChannel(SocketChannel socketChannel) {
 
                // Logger.d(TAG, "initChannel:" + sc.localAddress().getHostString() + ", " + sc.remoteAddress().getHostString());
-
-                /**
-                 * 粘包问题 https://blog.csdn.net/a123638/article/details/54377934
-                 */
                 // 增加任务处理
-                ChannelPipeline p = sc.pipeline();
-                p.addLast(
+                socketChannel.pipeline().addLast(
+                        new IdleStateHandler(5,7,10, TimeUnit.SECONDS),
                         new MessageDecoder(),
                         new MessageEncoder(),
                         new NettyServerHandler()
@@ -61,21 +59,26 @@ public class NettyServerBootstrap {
             }
         });
 
+        /**
+        * TCP参数设置
+        */
+        /*mServerBootstrap.option(ChannelOption.SO_BACKLOG, 1024);// 保持连接数
+        mServerBootstrap.option(ChannelOption.TCP_NODELAY, true);// 有数据立即发送
+        mServerBootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);// 保持连接
+*/
     }
 
     public void bind() {
-        ChannelFuture f = null;
         try {
-            f = mServerBootstrap.bind(Const.SERVER_PORT).sync();
+            ChannelFuture channelFuture = mServerBootstrap.bind(Const.SERVER_PORT).sync();
+            Logger.d(TAG, "Start Server at " + Const.SERVER_PORT + ", success: " + channelFuture.isSuccess());
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } finally {
+            //mBossGroup.shutdownGracefully();
+            //mWorkerGroup.shutdownGracefully();
         }
 
-        if (f.isSuccess()) {
-            Logger.d(TAG, "Server started success");
-        } else {
-            Logger.e(TAG, "long connection started fail");
-        }
     }
 
     public static void main(String[] args) {
@@ -85,4 +88,6 @@ public class NettyServerBootstrap {
             e.printStackTrace();
         }
     }
+
+
 }

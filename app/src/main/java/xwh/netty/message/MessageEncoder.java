@@ -9,7 +9,6 @@ import xwh.netty.server.Const;
 /**
  * Created by xwh on 18-7-14.
  */
-
 public class MessageEncoder extends MessageToByteEncoder<Message> {
 
 
@@ -33,18 +32,18 @@ public class MessageEncoder extends MessageToByteEncoder<Message> {
 
         writer.writeInt(msg.getSequence());
 
+	int bodyLength = 0;	// 消息体长度
         byte[] body = null;
         if (msg.getBody() != null && msg.getBody().length() > 0) {
             body = msg.getBody().getBytes(Const.DEFAULT_ENCODE);
+            bodyLength = body.length;
         }
 
-        if (null == body || 0 == body.length) {
-            writer.writeInt(0);
-        } else {
-            writer.writeInt(body.length);
+        writer.writeInt(bodyLength);
+        if (body != null) {
             writer.write(body);
         }
-
+        
         //Logger.d("MessageEncoder:", msg.getBody() +" ( " + out.capacity() + "  <-- " + out.writerIndex());
 
     }

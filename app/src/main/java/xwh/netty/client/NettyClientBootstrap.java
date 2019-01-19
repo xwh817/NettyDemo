@@ -80,7 +80,14 @@ public class NettyClientBootstrap {
         NettyClientBootstrap bootstrap = new NettyClientBootstrap(Const.SERVER_PORT, "127.0.0.1");
         bootstrap.connect();
 
-	    StringBuilder stringBuilder = new StringBuilder();
+        Message req = new Message();
+        req.setType(1);
+        req.setSequence(1);
+        req.setBody("message from client");
+        bootstrap.sendMessage(req);
+
+
+	    /*StringBuilder stringBuilder = new StringBuilder();
 	    for (int i = 1; i<= 1000; i++) {
 	    	stringBuilder.append("message from client ");
 	    }
@@ -94,6 +101,6 @@ public class NettyClientBootstrap {
             req.setBody(stringBuilder.toString());
             bootstrap.sendMessage(req);
             //bootstrap.sendString("message from client " + i);
-        }
+        }*/
     }
 }

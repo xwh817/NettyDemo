@@ -20,12 +20,12 @@ public class MessageDecoder extends ByteToMessageDecoder {
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         //Logger.d("MessageDecoder", "readableBytes:" + in.readableBytes() + " / capacity:" + in.capacity());
 
-        int readableBytes = in.readableBytes();
-        // 这儿不知道每次发送过来的数据有多大，所以要判断大小。 最小长度：4 + 1 + 4 + 4 + 4
+        int readableBytes = in.readableBytes();	// 当前游标处往后可读取的长度，该函数随着读取位置而变化的。
+        // 这儿不知道每次发送过来的数据有多大，所以要判断大小。 每次读取最小长度：4 + 1 + 4 + 4 + 4
         if (readableBytes < 17) {
-            return;
+            return;	// 数据不够，等下次
         }
-        // 标记开始读取位置，有可能缓存消息不全，要等下次继续读
+        // 标记开始读取位置。有可能后面发现缓存消息不全，要等下次继续读，见下面的resetReaderIndex。
         in.markReaderIndex();
 
         int header = in.readInt();
