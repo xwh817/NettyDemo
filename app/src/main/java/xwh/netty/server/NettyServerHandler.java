@@ -1,7 +1,11 @@
 package xwh.netty.server;
 
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import xwh.netty.message.Message;
 import xwh.netty.utils.Logger;
 
@@ -48,4 +52,31 @@ public class NettyServerHandler extends SimpleChannelInboundHandler<Message> {
     }
 
 
+    /**
+     * 管道中事件触发
+     */
+    @Override
+    public void userEventTriggered(final ChannelHandlerContext ctx, Object evt) throws Exception {
+        if(evt instanceof IdleStateEvent){  // 空闲状态事件
+            IdleStateEvent event = (IdleStateEvent)evt;
+
+            if(event.state() == IdleState.READER_IDLE) {
+                Logger.d(TAG, "READER_IDLE");
+            } else if(event.state() == IdleState.WRITER_IDLE) {
+                Logger.d(TAG, "WRITER_IDLE");
+            } else if(event.state() == IdleState.ALL_IDLE){
+                Logger.d(TAG, "ALL_IDLE");
+                //清除超时会话
+                ChannelFuture writeAndFlush = ctx.writeAndFlush(new Message(2, "会话超时，断开连接！"));
+                writeAndFlush.addListener(new ChannelFutureListener() {
+                    @Override
+                    public void operationComplete(ChannelFuture future) {
+                        ctx.channel().close();
+                    }
+                });
+            }
+        }else{
+            super.userEventTriggered(ctx, evt); // 其他事件使用默认
+        }
+    }
 }

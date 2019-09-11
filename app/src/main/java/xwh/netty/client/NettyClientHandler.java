@@ -12,7 +12,9 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Message> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Message msg) throws Exception {
-        //System.out.println(msg.getBody());
+
+        System.out.println(msg.getBody());
+
         /*RequestInfoVO req = new RequestInfoVO();
         req.setSequence(msg.getSequence());
         req.setType(msg.getType());
@@ -34,5 +36,6 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<Message> {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
+        System.out.println("channelInactive");
     }
 }

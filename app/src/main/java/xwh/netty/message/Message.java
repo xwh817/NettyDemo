@@ -12,6 +12,12 @@ public class Message {
     private String body;
     private int sequence;
 
+    public Message(){}
+    public Message(int type, String body) {
+        this.type = type;
+        this.body = body;
+    }
+
     public int getType() {
         return type;
     }
