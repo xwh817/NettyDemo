@@ -4,16 +4,17 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.EditText;
-
-import java.util.Date;
+import android.widget.Toast;
 
 import xwh.netty.client.NettyClientBootstrap;
-import xwh.netty.server.Const;
+import xwh.netty.client.NettyClientBootstrap.ConnectListener;
 import xwh.netty.message.Message;
+import xwh.netty.server.Const;
 
 public class ClientActivity extends AppCompatActivity {
 
 	private EditText mEditText;
+	private EditText mTextMessage;
 	private NettyClientBootstrap mNettyClientBootstrap;
 
 	@Override
@@ -21,6 +22,7 @@ public class ClientActivity extends AppCompatActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_client);
 		mEditText = this.findViewById(R.id.input_ip);
+		mTextMessage = this.findViewById(R.id.input_message);
 
 		this.findViewById(R.id.bt_click).setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -32,7 +34,9 @@ public class ClientActivity extends AppCompatActivity {
 		this.findViewById(R.id.bt_send).setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				send();
+				int type = 1;
+				String content = mTextMessage.getText().toString();
+				send(type, content);
 			}
 		});
 	}
@@ -42,7 +46,17 @@ public class ClientActivity extends AppCompatActivity {
 		final String serverIp = mEditText.getText().toString();
 		try {
 			mNettyClientBootstrap = new NettyClientBootstrap(Const.SERVER_PORT, serverIp);
-			mNettyClientBootstrap.connect();
+			mNettyClientBootstrap.connect(new ConnectListener() {
+				@Override
+				public void onSuccess() {
+					new Toast(ClientActivity.this).makeText(ClientActivity.this, "连接成功", Toast.LENGTH_LONG).show();
+				}
+
+				@Override
+				public void onFailure(Exception e) {
+					new Toast(ClientActivity.this).makeText(ClientActivity.this, "连接失败：" + e.getMessage(), Toast.LENGTH_LONG).show();
+				}
+			});
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -51,14 +65,13 @@ public class ClientActivity extends AppCompatActivity {
 
 	private int s = 1;
 
-	public void send() {
+	public void send(int type, String content) {
 		try {
 			Message req = new Message();
-			req.setType(1);
-			req.setSequence(s);
-			req.setBody(new Date().toString());
+			req.setType(type);
+			req.setSequence(s++);
+			req.setBody(content);
 			mNettyClientBootstrap.sendMessage(req);
-			s++;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

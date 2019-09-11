@@ -47,4 +47,13 @@ public class Message {
         }
         return json;
     }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "type=" + type +
+                ", body='" + body + '\'' +
+                ", sequence=" + sequence +
+                '}';
+    }
 }

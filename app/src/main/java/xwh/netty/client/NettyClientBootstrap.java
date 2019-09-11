@@ -56,14 +56,16 @@ public class NettyClientBootstrap {
 
     }
 
-    public void connect() {
+    public void connect(ConnectListener listener) {
 	    ChannelFuture future = null;
 	    try {
 		    future = mBootstrap.connect(this.host, this.port).sync();
 	    } catch (InterruptedException e) {
 		    e.printStackTrace();
+		    listener.onFailure(e);
 	    }
 	    if (future.isSuccess()) {
+		    listener.onSuccess();
 		    Logger.d(TAG,"connect server success");
 	    }
     }
@@ -78,7 +80,15 @@ public class NettyClientBootstrap {
 
     public static void main(String[] args) {
         NettyClientBootstrap bootstrap = new NettyClientBootstrap(Const.SERVER_PORT, "127.0.0.1");
-        bootstrap.connect();
+        bootstrap.connect(new ConnectListener() {
+	        @Override
+	        public void onSuccess() {
+	        }
+
+	        @Override
+	        public void onFailure(Exception e) {
+	        }
+        });
 
 	    StringBuilder stringBuilder = new StringBuilder();
 	    for (int i = 1; i<= 1000; i++) {
@@ -95,5 +105,10 @@ public class NettyClientBootstrap {
             bootstrap.sendMessage(req);
             //bootstrap.sendString("message from client " + i);
         }
+    }
+
+    public interface ConnectListener {
+    	void onSuccess();
+    	void onFailure(Exception e);
     }
 }

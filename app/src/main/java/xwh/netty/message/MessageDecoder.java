@@ -51,14 +51,14 @@ public class MessageDecoder extends ByteToMessageDecoder {
         byte[] body = new byte[length];
         in.readBytes(body);
 
-        Message req = new Message();
-        req.setBody(new String(body, "utf-8"));
-        req.setType(type);
-        req.setSequence(squence);
+        Message msg = new Message();
+        msg.setBody(new String(body, "utf-8"));
+        msg.setType(type);
+        msg.setSequence(squence);
 
-        out.add(req);
+        out.add(msg);
 
-        Logger.d("MessageDecoder", req.getSequence() +","+ req.getBody().length() +" ( "+ readableBytes + " / " + in.capacity() + "  <-- " + in.readerIndex());
-
+        //Logger.d("MessageDecoder", msg.getSequence() +","+ msg.getBody().length() +" ( "+ readableBytes + " / " + in.capacity() + "  <-- " + in.readerIndex());
+        Logger.d("MessageDecoder", msg.toString());
     }
 }

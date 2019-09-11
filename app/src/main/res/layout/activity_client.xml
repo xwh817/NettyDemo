@@ -16,6 +16,12 @@
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:text="Connect"/>
+
+	<EditText
+		android:id="@+id/input_message"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:text="Hello Netty" />
 	<Button
 		android:id="@+id/bt_send"
 		android:layout_width="match_parent"
